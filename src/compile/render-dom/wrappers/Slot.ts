@@ -140,11 +140,13 @@ export default class SlotWrapper extends Wrapper {
 		let update_conditions = [...this.dependencies].map(name => `changed.${name}`).join(' || ');
 		if (this.dependencies.size > 1) update_conditions = `(${update_conditions})`;
 
-		block.builders.update.addBlock(deindent`
-			if (${slot} && ${update_conditions}) {
-				${slot}.p(@assign(@assign({}, ${get_slot_changes}(changed)), ctx.$$scope.changed), @get_slot_context(${slot_definition}, ctx, ${get_slot_context}));
-			}
-		`);
+		if (block.hasUpdateMethod) {
+			block.builders.update.addBlock(deindent`
+				if (${slot} && ${update_conditions}) {
+					${slot}.p(@assign(@assign({}, ${get_slot_changes}(changed)), ctx.$$scope.changed), @get_slot_context(${slot_definition}, ctx, ${get_slot_context}));
+				}
+			`);
+		}
 
 		block.builders.destroy.addLine(
 			`if (${slot}) ${slot}.d(detach);`
